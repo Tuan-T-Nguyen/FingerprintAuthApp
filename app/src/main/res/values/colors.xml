@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1e2a4e</color>
+    <color name="colorPrimaryDark">#161e33</color>
+    <color name="background">#384e7e</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="yellow1">#FF4081</color>
+    <color name="yellow2">#FF4081</color>
+    <color name="grey05">#FF4081</color>
+    <color name="orange4">#FF4081</color>
+    <color name="orange5">#FF4081</color>
+    <color name="blue2">#FF4081</color>
+    <color name="blue25">#40dfff</color>
+    <color name="textColor">#ffffff</color>
+    <color name="sliver">#C0C0C0</color>
+    <color name="disabledText">#838383</color>
+    <color name="white">#ffffff</color>
+    <color name="yellow">#fffccc</color>
+    <color name="lightBlue">#96bcd5</color>
+    <color name="colorWorkSelectedLight">#d1c9b7</color>
+    <color name="transparent">#80FFFFFF</color>
+    <color name="control_background">#cc4285f4</color>
+    <color name="self_checked">#9dc4dd</color>
+    <color name="confirmed">#9dc4dd</color>
+    <color name="waiting_confirm">#faebc8</color>
+    <color name="denied">#f9f908</color>
+    <color name="work_done">#959aa6</color>
+    <color name="sending_error">#fcb604</color>
+    <color name="bg_error">#FF3333</color>
+</resources>

@@ -1,0 +1,16 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="font_normal_size">18sp</dimen>
+    <dimen name="txt_normal_size">18sp</dimen>
+    <dimen name="lb_note">18sp</dimen>
+    <dimen name="padding_label">20dp</dimen>
+    <dimen name="dm_common">8dp</dimen>
+    <dimen name="icon_tab_size">40dp</dimen>
+    <dimen name="margin_top_parent">26dp</dimen>
+    <dimen name="padding_lbl_form">14dp</dimen>
+    <dimen name="loading_above_size">25sp</dimen>
+    <dimen name="text_size_record_message">20sp</dimen>
+    <dimen name="padding_row_list">14dp</dimen>
+    <dimen name="radius_confirm_dialog">8dp</dimen>
+    <dimen name="margin_bottom_button_record">4dp</dimen>
+</resources>
