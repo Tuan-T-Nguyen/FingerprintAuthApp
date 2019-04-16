@@ -1,4 +1,4 @@
-package com.example.fingerprintauthapp;
+package com.example.fingerprintauthapp.callback;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

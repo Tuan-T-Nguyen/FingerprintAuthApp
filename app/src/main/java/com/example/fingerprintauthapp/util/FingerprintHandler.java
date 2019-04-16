@@ -1,4 +1,4 @@
-package com.example.fingerprintauthapp;
+package com.example.fingerprintauthapp.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -10,6 +10,8 @@ import android.os.CancellationSignal;
 import android.support.v4.content.ContextCompat;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.fingerprintauthapp.R;
 
 @TargetApi(Build.VERSION_CODES.M)
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {

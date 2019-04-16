@@ -1,32 +1,32 @@
-package com.example.fingerprintauthapp;
+package com.example.fingerprintauthapp.ui;
 
 
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.KeyguardManager;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.DatabaseUtils;
-import android.databinding.BindingMethods;
-import android.databinding.DataBinderMapperImpl;
-import android.databinding.DataBindingComponent;
 import android.databinding.DataBindingUtil;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
+import com.example.fingerprintauthapp.SharedPrefs;
+import com.example.fingerprintauthapp.util.FingerprintHandler;
+import com.example.fingerprintauthapp.R;
 import com.example.fingerprintauthapp.databinding.ActivityMainBinding;
+import com.example.fingerprintauthapp.util.Keyboard;
+import com.example.fingerprintauthapp.viewmodels.LoginForm;
+import com.example.fingerprintauthapp.viewmodels.LoginViewModel;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -45,9 +45,10 @@ import javax.crypto.SecretKey;
 
 // todo https://riptutorial.com/android/example/29719/how-to-use-android-fingerprint-api-to-save-user-passwords
 //https://www.sitepoint.com/securing-your-android-apps-with-the-fingerprint-api/
-public class MainActivity extends AppCompatActivity implements FingerprintHandler.Callback {
+public class MainActivity extends BaseActivity implements FingerprintHandler.Callback {
 
     private ActivityMainBinding mBinding;
+    private LoginViewModel loginViewModel;
 
     private FingerprintManager fingerprintManager;
     private KeyguardManager keyguardManager;
@@ -66,63 +67,72 @@ public class MainActivity extends AppCompatActivity implements FingerprintHandle
         super.onCreate(savedInstanceState);
 
         setupBinding(savedInstanceState);
+        setupObserve();
 
-        try {
-            mKeyStore = KeyStore.getInstance("AndroidKeyStore");
-        } catch (KeyStoreException e) {
-            throw new RuntimeException("Failed to get an instance of KeyStore", e);
-        }
-        try {
-            mKeyGenerator = KeyGenerator
-                    .getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new RuntimeException("Failed to get an instance of KeyGenerator", e);
-        }
-        Cipher defaultCipher;
-        //Cipher cipherNotInvalidated;
-        try {
-            defaultCipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
-                    + KeyProperties.BLOCK_MODE_CBC + "/"
-                    + KeyProperties.ENCRYPTION_PADDING_PKCS7);
+        String emailLogin = SharedPrefs.getInstance().get(getString(R.string.shared_saved_email_login), String.class);
+        int isTurnOnFinger = SharedPrefs.getInstance().get(getString(R.string.shared_turn_on_fingerprint_function), Integer.class);
+        if (emailLogin != null && emailLogin.equals("")
+            || isTurnOnFinger == 0) {
+            mBinding.setIsSupportFinger(false);
+        } else {
+            try {
+                mKeyStore = KeyStore.getInstance("AndroidKeyStore");
+            } catch (KeyStoreException e) {
+                throw new RuntimeException("Failed to get an instance of KeyStore", e);
+            }
+            try {
+                mKeyGenerator = KeyGenerator
+                        .getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                throw new RuntimeException("Failed to get an instance of KeyGenerator", e);
+            }
+            Cipher defaultCipher;
+            //Cipher cipherNotInvalidated;
+            try {
+                defaultCipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
+                        + KeyProperties.BLOCK_MODE_CBC + "/"
+                        + KeyProperties.ENCRYPTION_PADDING_PKCS7);
 //            cipherNotInvalidated = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
 //                    + KeyProperties.BLOCK_MODE_CBC + "/"
 //                    + KeyProperties.ENCRYPTION_PADDING_PKCS7);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("Failed to get an instance of Cipher", e);
-        }
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+                throw new RuntimeException("Failed to get an instance of Cipher", e);
+            }
+            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-            keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+                keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
-            if(!fingerprintManager.isHardwareDetected()){
-                mBinding.setIsSupportFinger(false);
-            } else if (!keyguardManager.isKeyguardSecure()){
-                mBinding.setWarningText("Secure lock screen hasn't set up.\nGo to 'Settings -> Security -> Fingerprint' to set up a fingerprint");
-            } else if (!fingerprintManager.hasEnrolledFingerprints()){
-                mBinding.setWarningText("Go to 'Settings -> Security -> Fingerprint' and register at least one fingerprint");
-            } else {
-                mBinding.setIsSupportFinger(true);
+                if(!fingerprintManager.isHardwareDetected()){
+                    mBinding.setIsSupportFinger(false);
+                } else if (!keyguardManager.isKeyguardSecure()){
+                    mBinding.setWarningText("Secure lock screen hasn't set up.\nGo to 'Settings -> Security -> Fingerprint' to set up a fingerprint");
+                } else if (!fingerprintManager.hasEnrolledFingerprints()){
+                    mBinding.setWarningText("Go to 'Settings -> Security -> Fingerprint' and register at least one fingerprint");
+                } else {
+                    mBinding.setIsSupportFinger(true);
 
-                createKey(DEFAULT_KEY_NAME, true);
-                //createKey(KEY_NAME_NOT_INVALIDATED, false);
+                    createKey(DEFAULT_KEY_NAME, true);
+                    //createKey(KEY_NAME_NOT_INVALIDATED, false);
 
-                if (initCipher(defaultCipher, DEFAULT_KEY_NAME)) {
-                    FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(defaultCipher);
+                    if (initCipher(defaultCipher, DEFAULT_KEY_NAME)) {
+                        FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(defaultCipher);
 
-                    boolean useFingerprintPreference = mSharedPreferences
-                            .getBoolean("use_fingerprint_to_authenticate_key",
-                                    true);
-                    if (useFingerprintPreference) {
-                        FingerprintHandler fingerprintHandler = new FingerprintHandler(this, this);
-                        fingerprintHandler.startAuth(fingerprintManager, cryptoObject);
+                        boolean useFingerprintPreference = mSharedPreferences
+                                .getBoolean("use_fingerprint_to_authenticate_key",
+                                        true);
+                        if (useFingerprintPreference) {
+                            FingerprintHandler fingerprintHandler = new FingerprintHandler(this, this);
+                            fingerprintHandler.startAuth(fingerprintManager, cryptoObject);
+                        }
+
                     }
-
                 }
             }
         }
     }
+
 
     private void setupBinding(Bundle savedInstanceState) {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -132,6 +142,34 @@ public class MainActivity extends AppCompatActivity implements FingerprintHandle
         }
         mBinding.setWarningText("");
         mBinding.setIsSupportFinger(false);
+
+        loginViewModel = ViewModelProviders.of(this).get(LoginViewModel.class);
+        mBinding.setLoginViewModel(loginViewModel);
+    }
+
+    private void setupObserve() {
+        loginViewModel.getBtnLogin().observe(this, new Observer<LoginForm>() {
+            @Override
+            public void onChanged(@Nullable final LoginForm loginForm) {
+                if (loginForm != null) {
+                    Keyboard.hideSoftKeyboard(MainActivity.this);
+                    showLoading();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Assume you login successfully
+                            SharedPrefs.getInstance().put(getString(R.string.shared_saved_email_login), loginForm.email.get());
+                            hideLoading();
+                            Toast.makeText(MainActivity.this, loginForm.email.get(), Toast.LENGTH_SHORT).show();
+
+                            goAfterLoginScreen();
+
+                        }
+                    }, 2000);
+
+                }
+            }
+        });
     }
 
     /**
@@ -264,11 +302,14 @@ public class MainActivity extends AppCompatActivity implements FingerprintHandle
 //    }
 
 
-    @Override
-    public void onFingerAuthenticated() {
-        Intent intent = new Intent(this, WorkListActivity.class);
+    private void goAfterLoginScreen() {
+        Intent intent = new Intent(this, SecondActivity.class);
         startActivity(intent);
         finish();
+    }
+    @Override
+    public void onFingerAuthenticated() {
+        goAfterLoginScreen();
     }
 
     @Override

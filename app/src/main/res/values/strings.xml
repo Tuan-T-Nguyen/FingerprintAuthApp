@@ -1,20 +1,12 @@
 <resources>
     <string name="app_name">FingerprintAuthApp</string>
 
-    <!-- WORK LIST -->
-    <string name="work_list">作業一覧</string>
-    <string name="work_register">新規作業登録</string>
-    <string name="confirm_with_office">事務所に確認</string>
-    <string name="work_done">作業完了</string>
-    <string name="self_check">セルフチェック</string>
-    <string name="self_checked">セルフチェック済</string>
-    <string name="waiting_confirm">事務所確認待ち</string>
-    <string name="approved">事務所確認済</string>
-    <string name="denied">否認</string>
-    <string name="sending_error">送信エラー</string>
-    <string name="work_done_confirm">%1$sの完了報告を送信し作業を完了させますか？</string>
-    <string name="office_comment">事務所コメント</string>
-    <string name="close">閉じる</string>
-    <string name="title_activity_work_list">WorkListActivity</string>
+    <string name="shared_saved_email_login">shared_saved_email_login</string>
+    <string name="shared_turn_on_fingerprint_function">shared_turn_on_fingerprint_function</string>
+    <string name="email">Email</string>
+    <string name="you_are_login_successfully">You are login successfully</string>
+    <string name="login">Login</string>
+    <string name="login_by_fingerprint">Login By Fingerprint</string>
+    <string name="logout">Logout</string>
 
 </resources>
