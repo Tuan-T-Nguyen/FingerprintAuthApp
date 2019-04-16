@@ -25,5 +25,7 @@
     <string name="biometric_success">Login Successful</string>
     <string name="login_by_password">Login By Password</string>
     <string name="login_by_fingerprint">Login By Fingerprint</string>
+    <string name="email_any">Email: any</string>
+    <string name="pass_any_or_empty">Pass: any or empty</string>
 
 </resources>
